@@ -30,6 +30,9 @@ func main() {
 		log.Fatalf("ensuring indexes: %v", err)
 	}
 
+	newsItems := mongodb.NewNewsItemReader(client)
+	generalFeed := mongodb.NewGeneralFeedStore(client)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -47,7 +50,7 @@ func main() {
 		log.Fatal("JWT_SECRET environment variable is not set")
 	}
 
-	router := httpapi.NewRouter(users, mailer, baseURL, []byte(jwtSecret))
+	router := httpapi.NewRouter(users, newsItems, generalFeed, mailer, baseURL, []byte(jwtSecret))
 	log.Printf("listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatalf("server error: %v", err)

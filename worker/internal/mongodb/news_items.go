@@ -45,8 +45,11 @@ func (s *NewsItemStore) Insert(ctx context.Context, item domain.NewsItem) error 
 
 // Upsert saves item keyed by its project: a first call inserts it, and a later
 // call for the same project (e.g. a new release) replaces the existing
-// document in place instead of accumulating history.
-func (s *NewsItemStore) Upsert(ctx context.Context, item domain.NewsItem) error {
+// document in place instead of accumulating history. It reports whether this
+// call actually changed the stored data (a brand new project, or any field
+// differing from what was already stored) versus a no-op re-save of identical
+// data, so callers can decide whether to notify anyone about the change.
+func (s *NewsItemStore) Upsert(ctx context.Context, item domain.NewsItem) (bool, error) {
 	filter := bson.M{"project": item.Project}
 	update := bson.M{"$set": bson.M{
 		"title":        item.Title,
@@ -57,7 +60,12 @@ func (s *NewsItemStore) Upsert(ctx context.Context, item domain.NewsItem) error 
 		"type":         item.Type,
 		"body":         item.Body,
 		"severity":     item.Severity,
+		"technology":   item.Technology,
 	}}
-	_, err := s.collection.UpdateOne(ctx, filter, update, options.UpdateOne().SetUpsert(true))
-	return err
+	result, err := s.collection.UpdateOne(ctx, filter, update, options.UpdateOne().SetUpsert(true))
+	if err != nil {
+		return false, err
+	}
+	changed := result.UpsertedCount > 0 || result.ModifiedCount > 0
+	return changed, nil
 }

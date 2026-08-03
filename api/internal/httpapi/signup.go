@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Platon223/DevSwell/api/domain"
 	"github.com/Platon223/DevSwell/api/internal/email"
 	"github.com/Platon223/DevSwell/api/internal/mongodb"
-	"github.com/Platon223/DevSwell/domain"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,7 +45,7 @@ func signupHandler(users *mongodb.UserStore, mailer *email.Client, baseURL strin
 			return
 		}
 
-		token, err := generateVerificationToken()
+		token, err := generateToken()
 		if err != nil {
 			http.Error(w, "could not create account", http.StatusInternalServerError)
 			return
@@ -80,7 +80,7 @@ func signupHandler(users *mongodb.UserStore, mailer *email.Client, baseURL strin
 	}
 }
 
-func generateVerificationToken() (string, error) {
+func generateToken() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err

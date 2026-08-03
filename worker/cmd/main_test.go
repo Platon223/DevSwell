@@ -16,7 +16,7 @@ func TestNewsItemFromReleaseAttachesSeverity(t *testing.T) {
 		PublishedAt: time.Now(),
 		Body:        "BREAKING CHANGE: removed the old config format.",
 	}
-	item := newsItemFromRelease("example/project", breaking)
+	item := newsItemFromRelease("example/project", "Go", breaking)
 	if item.Severity != string(classifier.SeverityBreaking) {
 		t.Fatalf("expected breaking severity, got %q", item.Severity)
 	}
@@ -28,7 +28,7 @@ func TestNewsItemFromReleaseAttachesSeverity(t *testing.T) {
 		PublishedAt: time.Now(),
 		Body:        "Fixed a typo in the docs.",
 	}
-	item = newsItemFromRelease("example/project", patch)
+	item = newsItemFromRelease("example/project", "Go", patch)
 	if item.Severity != string(classifier.SeverityPatch) {
 		t.Fatalf("expected patch severity, got %q", item.Severity)
 	}

@@ -17,7 +17,7 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	Token string `json:"token"`
+	Email string `json:"email"`
 }
 
 type authClaims struct {
@@ -65,7 +65,7 @@ func loginHandler(users *mongodb.UserStore, jwtSecret []byte) http.HandlerFunc {
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject:   user.ID.Hex(),
 				IssuedAt:  jwt.NewNumericDate(now),
-				ExpiresAt: jwt.NewNumericDate(now.Add(7 * 24 * time.Hour)),
+				ExpiresAt: jwt.NewNumericDate(now.Add(sessionDuration)),
 			},
 		}
 
@@ -75,7 +75,8 @@ func loginHandler(users *mongodb.UserStore, jwtSecret []byte) http.HandlerFunc {
 			return
 		}
 
+		setSessionCookie(w, signed)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(loginResponse{Token: signed})
+		json.NewEncoder(w).Encode(loginResponse{Email: user.Email})
 	}
 }

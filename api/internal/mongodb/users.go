@@ -3,7 +3,7 @@ package mongodb
 import (
 	"context"
 
-	"github.com/Platon223/DevSwell/domain"
+	"github.com/Platon223/DevSwell/api/domain"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -42,6 +42,12 @@ func (s *UserStore) FindByEmail(ctx context.Context, email string) (domain.User,
 	return user, err
 }
 
+func (s *UserStore) FindByID(ctx context.Context, id bson.ObjectID) (domain.User, error) {
+	var user domain.User
+	err := s.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	return user, err
+}
+
 func (s *UserStore) FindByVerificationToken(ctx context.Context, token string) (domain.User, error) {
 	var user domain.User
 	err := s.collection.FindOne(ctx, bson.M{"verification_token": token}).Decode(&user)
@@ -52,5 +58,30 @@ func (s *UserStore) MarkVerified(ctx context.Context, id bson.ObjectID) error {
 	_, err := s.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{
 		"$set": bson.M{"verified": true, "verification_token": ""},
 	})
+	return err
+}
+
+func (s *UserStore) UpdateStack(ctx context.Context, id bson.ObjectID, stack []string) error {
+	_, err := s.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{
+		"$set": bson.M{"stack": stack},
+	})
+	return err
+}
+
+func (s *UserStore) SetDeletionToken(ctx context.Context, id bson.ObjectID, token string) error {
+	_, err := s.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{
+		"$set": bson.M{"deletion_token": token},
+	})
+	return err
+}
+
+func (s *UserStore) FindByDeletionToken(ctx context.Context, token string) (domain.User, error) {
+	var user domain.User
+	err := s.collection.FindOne(ctx, bson.M{"deletion_token": token}).Decode(&user)
+	return user, err
+}
+
+func (s *UserStore) Delete(ctx context.Context, id bson.ObjectID) error {
+	_, err := s.collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err
 }

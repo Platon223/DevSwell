@@ -84,13 +84,29 @@ func TestNewsItemStoreUpsertDoesNotDuplicate(t *testing.T) {
 		Type:        "release",
 		Body:        "original body",
 	}
-	if err := store.Upsert(ctx, item); err != nil {
+	changed, err := store.Upsert(ctx, item)
+	if err != nil {
 		t.Fatalf("first upsert: %v", err)
+	}
+	if !changed {
+		t.Fatal("first upsert (brand new project) should report changed=true")
+	}
+
+	sameAgain, err := store.Upsert(ctx, item)
+	if err != nil {
+		t.Fatalf("re-upserting identical data: %v", err)
+	}
+	if sameAgain {
+		t.Fatal("re-upserting identical data should report changed=false")
 	}
 
 	item.Title = "Updated title"
-	if err := store.Upsert(ctx, item); err != nil {
+	changed, err = store.Upsert(ctx, item)
+	if err != nil {
 		t.Fatalf("second upsert: %v", err)
+	}
+	if !changed {
+		t.Fatal("upsert with a different title should report changed=true")
 	}
 
 	count, err := store.collection.CountDocuments(ctx, bson.M{"project": project})
@@ -140,7 +156,7 @@ func TestNewsItemStoreUpsertReplacesOldReleaseForSameProject(t *testing.T) {
 		Type:        "release",
 		Body:        "first release notes",
 	}
-	if err := store.Upsert(ctx, old); err != nil {
+	if _, err := store.Upsert(ctx, old); err != nil {
 		t.Fatalf("upserting old release: %v", err)
 	}
 
@@ -148,7 +164,7 @@ func TestNewsItemStoreUpsertReplacesOldReleaseForSameProject(t *testing.T) {
 	newer.Title = "v1.1.0"
 	newer.URL = newURL
 	newer.Body = "second release notes"
-	if err := store.Upsert(ctx, newer); err != nil {
+	if _, err := store.Upsert(ctx, newer); err != nil {
 		t.Fatalf("upserting newer release: %v", err)
 	}
 

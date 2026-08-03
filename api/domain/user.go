@@ -10,4 +10,5 @@ type User struct {
 	Plan              string        `bson:"plan"`
 	Verified          bool          `bson:"verified"`
 	VerificationToken string        `bson:"verification_token,omitempty"`
+	DeletionToken     string        `bson:"deletion_token,omitempty"`
 }

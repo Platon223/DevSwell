@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Platon223/DevSwell/domain"
+	"github.com/Platon223/DevSwell/api/domain"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
