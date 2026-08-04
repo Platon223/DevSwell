@@ -1,0 +1,56 @@
+{{define "title"}}Support{{end}}
+{{define "content"}}
+  <h1>Support</h1>
+  <p class="page-sub">Feedback, bugs, feature requests — send it our way.</p>
+
+  <div class="card">
+    <form id="supportForm" onsubmit="return handleSupport(event)">
+      <div class="field">
+        <label for="supportCategory">Category</label>
+        <select id="supportCategory">
+          <option value="Feedback">Feedback</option>
+          <option value="Bug Report">Bug report</option>
+          <option value="Feature Request">Feature request</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="supportMessage">Message</label>
+        <textarea id="supportMessage" required placeholder="What's on your mind?"></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Send message</button>
+      <div class="form-message" id="supportMessageStatus"></div>
+    </form>
+  </div>
+{{end}}
+{{define "script"}}
+<script>
+  async function handleSupport(e) {
+    e.preventDefault();
+    var category = document.getElementById('supportCategory').value;
+    var message = document.getElementById('supportMessage').value;
+    var status = document.getElementById('supportMessageStatus');
+
+    try {
+      var res = await fetch('/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: category, message: message })
+      });
+      var data = res.ok ? await res.json() : null;
+      if (res.ok) {
+        status.textContent = data.message;
+        status.className = 'form-message success';
+        document.getElementById('supportMessage').value = '';
+      } else {
+        status.textContent = await res.text();
+        status.className = 'form-message error';
+      }
+    } catch (err) {
+      status.textContent = 'Something went wrong. Please try again.';
+      status.className = 'form-message error';
+    }
+    return false;
+  }
+</script>
+{{end}}

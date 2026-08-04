@@ -1,0 +1,47 @@
+{{define "title"}}Help{{end}}
+{{define "content"}}
+  <h1>Help</h1>
+  <p class="page-sub">Common questions about how DevSwell works.</p>
+
+  <div class="card">
+    <details class="faq-item" open>
+      <summary>What is DevSwell?</summary>
+      <p>DevSwell sends you a personalized digest of changes to your tech stack — releases, breaking changes, and security patches — so you don't have to scroll changelogs and social media to stay current.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How is this different from General News?</summary>
+      <p>Your <strong>Home</strong> digest is filtered to exactly the technologies you pick on the <strong>Stack</strong> page. <strong>General News</strong> is unfiltered — the current top stories from Hacker News, for casual browsing.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How do severity labels work?</summary>
+      <p>Each item is automatically classified as <strong>security</strong>, <strong>breaking</strong>, or <strong>patch</strong> based on keywords in the release notes. Security issues are flagged with the highest priority.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How do I change what I track?</summary>
+      <p>Head to the <strong>Stack</strong> page and click any technology bubble to select or deselect it, then hit Save. Your digest updates immediately.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How often will I get email updates?</summary>
+      <p>We only email you when something in your tracked stack actually changes — no spam, no fixed schedule of empty updates.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How do I delete my account?</summary>
+      <p>Go to <strong>Settings</strong> → Danger zone → Delete my account. We'll send a confirmation link to your email before anything is actually deleted — nothing happens until you click it.</p>
+    </details>
+    <details class="faq-item">
+      <summary>I have a question that isn't answered here.</summary>
+      <p>Head over to the <strong>Support</strong> page and send us a message.</p>
+    </details>
+  </div>
+{{end}}
+{{define "script"}}
+<style>
+  .faq-item { border-bottom: 1px solid var(--border); padding: 14px 0; }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-item summary { cursor: pointer; font-weight: 600; font-size: 14px; list-style: none; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::before { content: '+ '; color: var(--accent); }
+  .faq-item[open] summary::before { content: '− '; }
+  .faq-item p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 10px 0 0; }
+</style>
+{{end}}

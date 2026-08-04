@@ -1,0 +1,89 @@
+{{define "title"}}Home{{end}}
+{{define "content"}}
+  <h1 id="welcomeHeading">Loading&hellip;</h1>
+  <p class="page-sub" id="welcomeSub"></p>
+
+  <div class="card" id="recentCard" style="display:none;">
+    <h2>Recent</h2>
+    <div id="recentList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Your digest</h2>
+    <div id="digestList" class="loading">Loading your digest&hellip;</div>
+  </div>
+{{end}}
+{{define "script"}}
+<script>
+  async function loadMe() {
+    var res = await fetch('/me');
+    if (!res.ok) {
+      window.location.href = '/';
+      return null;
+    }
+    var me = await res.json();
+    document.getElementById('welcomeHeading').textContent = 'Welcome back';
+    document.getElementById('welcomeSub').textContent = me.email + ' · ' + me.plan + ' plan';
+    return me;
+  }
+
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function isRecent(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return false;
+    var threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+    return d.getTime() >= threeDaysAgo;
+  }
+
+  function renderItem(item) {
+    return '' +
+      '<div class="digest-item">' +
+        '<div class="digest-item-top">' +
+          '<span class="badge ' + escapeHTML(item.severity) + '">' + escapeHTML(item.severity) + '</span>' +
+          '<h3><a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener">' + escapeHTML(item.title) + '</a></h3>' +
+        '</div>' +
+        '<div class="meta">' + escapeHTML(item.project) + ' · ' + escapeHTML(item.technology) + ' · ' + formatDate(item.published_at) + '</div>' +
+      '</div>';
+  }
+
+  async function loadDigest() {
+    var el = document.getElementById('digestList');
+    var res = await fetch('/digest');
+    if (!res.ok) {
+      el.textContent = 'Could not load your digest.';
+      return;
+    }
+    var data = await res.json();
+    var items = data.items || [];
+
+    if (items.length === 0) {
+      el.innerHTML = '<div class="empty-state">Nothing here yet. <a href="/dashboard/stack">Set your stack</a> to start seeing relevant updates.</div>';
+      return;
+    }
+
+    var recentItems = items.filter(function (item) { return isRecent(item.published_at); });
+    if (recentItems.length > 0) {
+      document.getElementById('recentCard').style.display = '';
+      document.getElementById('recentList').innerHTML = recentItems.map(renderItem).join('');
+    }
+
+    el.innerHTML = items.map(renderItem).join('');
+  }
+
+  loadMe().then(function (me) { if (me) loadDigest(); });
+</script>
+<style>
+  .digest-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .digest-item:last-child { border-bottom: none; }
+  .digest-item-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .digest-item h3 { font-size: 15px; margin: 0; }
+  .digest-item a { text-decoration: none; }
+  .digest-item a:hover { color: var(--accent); }
+  .digest-item .meta { color: var(--text-muted); font-size: 13px; }
+</style>
+{{end}}

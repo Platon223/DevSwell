@@ -1,0 +1,55 @@
+{{define "title"}}Settings{{end}}
+{{define "content"}}
+  <h1>Settings</h1>
+  <p class="page-sub">Your account details.</p>
+
+  <div class="card">
+    <h2>Account</h2>
+    <div class="field">
+      <label>Email</label>
+      <input type="text" id="settingsEmail" disabled>
+    </div>
+    <div class="field">
+      <label>Plan</label>
+      <input type="text" id="settingsPlan" disabled>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: var(--danger);">
+    <h2 style="color: var(--danger);">Danger zone</h2>
+    <p class="page-sub" style="margin-bottom:16px;">Deleting your account is permanent and cannot be undone. We'll email you a confirmation link before anything is actually deleted.</p>
+    <button type="button" class="btn-danger" onclick="requestDeletion()">Delete my account</button>
+    <div class="form-message" id="deleteMessage"></div>
+  </div>
+{{end}}
+{{define "script"}}
+<script>
+  async function loadSettings() {
+    var res = await fetch('/me');
+    if (!res.ok) {
+      window.location.href = '/';
+      return;
+    }
+    var me = await res.json();
+    document.getElementById('settingsEmail').value = me.email;
+    document.getElementById('settingsPlan').value = me.plan;
+  }
+
+  async function requestDeletion() {
+    if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return;
+
+    var res = await fetch('/me/delete', { method: 'POST' });
+    var msg = document.getElementById('deleteMessage');
+    if (res.ok) {
+      var data = await res.json();
+      msg.textContent = data.message;
+      msg.className = 'form-message success';
+    } else {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.className = 'form-message error';
+    }
+  }
+
+  loadSettings();
+</script>
+{{end}}

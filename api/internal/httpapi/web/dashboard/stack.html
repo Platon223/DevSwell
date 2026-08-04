@@ -1,0 +1,187 @@
+{{define "title"}}Stack{{end}}
+{{define "content"}}
+  <h1>Your stack</h1>
+  <p class="page-sub">Pick the technologies you want to track. We'll filter your daily digest down to just these.</p>
+
+  <div id="categoryContainer"></div>
+
+  <button type="button" class="btn-primary" onclick="saveStack()">Save stack</button>
+  <div class="form-message" id="stackMessage"></div>
+{{end}}
+{{define "script"}}
+<script>
+  // Real brand logos via the Simple Icons CDN (cdn.simpleicons.org) — each
+  // <img> falls back to a plain initials badge if the icon fails to load.
+  var CATEGORIES = [
+    {
+      name: 'Languages',
+      items: [
+        { id: 'Go',         slug: 'go' },
+        { id: 'JavaScript', slug: 'javascript' },
+        { id: 'TypeScript', slug: 'typescript' },
+        { id: 'Python',     slug: 'python' },
+        { id: 'Rust',       slug: 'rust' },
+        { id: 'Java',       slug: 'openjdk' },
+        { id: 'C#',         slug: 'dotnet' },
+        { id: 'Ruby',       slug: 'ruby' },
+        { id: 'PHP',        slug: 'php' },
+        { id: 'Swift',      slug: 'swift' },
+        { id: 'Kotlin',     slug: 'kotlin' },
+        { id: 'Dart',       slug: 'dart' },
+        { id: 'Elixir',     slug: 'elixir' },
+        { id: 'Scala',      slug: 'scala' }
+      ]
+    },
+    {
+      name: 'Frameworks',
+      items: [
+        { id: 'React',        slug: 'react' },
+        { id: 'Vue.js',        slug: 'vuedotjs' },
+        { id: 'Angular',      slug: 'angular' },
+        { id: 'Next.js',       slug: 'nextdotjs' },
+        { id: 'Nuxt',         slug: 'nuxt' },
+        { id: 'Svelte',       slug: 'svelte' },
+        { id: 'Django',       slug: 'django' },
+        { id: 'Flask',        slug: 'flask' },
+        { id: 'FastAPI',      slug: 'fastapi' },
+        { id: 'Express',      slug: 'express' },
+        { id: 'Spring',       slug: 'spring' },
+        { id: 'Ruby on Rails', slug: 'rubyonrails' },
+        { id: 'Laravel',      slug: 'laravel' },
+        { id: '.NET',         slug: 'dotnet' }
+      ]
+    },
+    {
+      name: 'Databases',
+      items: [
+        { id: 'MongoDB',       slug: 'mongodb' },
+        { id: 'PostgreSQL',    slug: 'postgresql' },
+        { id: 'MariaDB',       slug: 'mariadb' },
+        { id: 'Redis',         slug: 'redis' },
+        { id: 'SQLite',        slug: 'sqlite' },
+        { id: 'Elasticsearch', slug: 'elasticsearch' },
+        { id: 'Cassandra',     slug: 'apachecassandra' },
+        { id: 'Firebase',      slug: 'firebase' },
+        { id: 'Supabase',      slug: 'supabase' }
+      ]
+    },
+    {
+      name: 'Tools & Platforms',
+      items: [
+        { id: 'Docker',       slug: 'docker' },
+        { id: 'Kubernetes',   slug: 'kubernetes' },
+        { id: 'Git',          slug: 'git' },
+        { id: 'Terraform',    slug: 'terraform' },
+        { id: 'DigitalOcean', slug: 'digitalocean' },
+        { id: 'Vercel',       slug: 'vercel' },
+        { id: 'Netlify',      slug: 'netlify' },
+        { id: 'Nginx',        slug: 'nginx' },
+        { id: 'Linux',        slug: 'linux' },
+        { id: 'Webpack',      slug: 'webpack' },
+        { id: 'Vite',         slug: 'vite' },
+        { id: 'GraphQL',      slug: 'graphql' }
+      ]
+    }
+  ];
+
+  var selected = new Set();
+
+  function initials(id) {
+    return id.replace(/[^A-Za-z]/g, '').slice(0, 2);
+  }
+
+  function bubbleHTML(item) {
+    var isSelected = selected.has(item.id);
+    return '' +
+      '<div class="lang-bubble' + (isSelected ? ' selected' : '') + '" data-id="' + escapeHTML(item.id) + '" onclick="toggleLang(\'' + item.id.replace(/'/g, "\\'") + '\')">' +
+        '<div class="lang-icon">' +
+          '<img src="https://cdn.simpleicons.org/' + item.slug + '" alt="" loading="lazy" ' +
+            'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
+          '<span class="lang-fallback">' + escapeHTML(initials(item.id)) + '</span>' +
+        '</div>' +
+        '<div class="lang-label">' + escapeHTML(item.id) + '</div>' +
+      '</div>';
+  }
+
+  function renderCategories() {
+    var container = document.getElementById('categoryContainer');
+    container.innerHTML = CATEGORIES.map(function (category) {
+      return '' +
+        '<div class="card">' +
+          '<h2>' + escapeHTML(category.name) + '</h2>' +
+          '<div class="lang-grid">' + category.items.map(bubbleHTML).join('') + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function toggleLang(id) {
+    if (selected.has(id)) selected.delete(id); else selected.add(id);
+    document.querySelectorAll('.lang-bubble').forEach(function (el) {
+      if (el.dataset.id === id) el.classList.toggle('selected');
+    });
+  }
+
+  async function saveStack() {
+    var res = await fetch('/me/stack', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stack: Array.from(selected) })
+    });
+    var msg = document.getElementById('stackMessage');
+    if (res.ok) {
+      msg.textContent = 'Saved!';
+      msg.className = 'form-message success';
+    } else {
+      msg.textContent = 'Could not save your stack. Please try again.';
+      msg.className = 'form-message error';
+    }
+  }
+
+  async function loadCurrentStack() {
+    var res = await fetch('/me');
+    if (!res.ok) {
+      window.location.href = '/';
+      return;
+    }
+    var me = await res.json();
+    (me.stack || []).forEach(function (s) { selected.add(s); });
+    renderCategories();
+  }
+
+  loadCurrentStack();
+</script>
+<style>
+  .lang-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .lang-bubble {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 84px;
+    padding: 12px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+    user-select: none;
+  }
+  .lang-bubble:hover { border-color: var(--border-hover); }
+  .lang-bubble.selected { border-color: var(--accent); background: var(--accent-subtle); }
+  .lang-icon {
+    width: 38px; height: 38px; border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    display: grid; place-items: center; flex-shrink: 0;
+    position: relative;
+  }
+  .lang-icon img { width: 20px; height: 20px; object-fit: contain; }
+  .lang-fallback {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    font-size: 11px; font-weight: 800; color: #04121a;
+  }
+  .lang-label { font-size: 11px; font-weight: 500; color: var(--text); text-align: center; line-height: 1.3; }
+</style>
+{{end}}

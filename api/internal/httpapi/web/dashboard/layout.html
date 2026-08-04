@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{template "title" .}} — DevSwell</title>
+<link rel="icon" type="image/png" href="/static/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    var saved = localStorage.getItem('theme');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+  })();
+</script>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0a0a0a;
+    --bg-elevated: #111111;
+    --bg-card: #0e0e0e;
+    --text: #f2f2f2;
+    --text-muted: #8a8a8a;
+    --border: #1f1f1f;
+    --border-hover: #2e2e2e;
+    --accent: #2b9fe0;
+    --accent-text: #ffffff;
+    --accent-subtle: rgba(43, 159, 224, 0.12);
+    --danger: #e5534b;
+    --danger-subtle: rgba(229, 83, 75, 0.12);
+    --sev-security-bg: rgba(229, 83, 75, 0.12);
+    --sev-security-fg: #f0827c;
+    --sev-breaking-bg: rgba(219, 155, 26, 0.12);
+    --sev-breaking-fg: #e0a72e;
+    --sev-patch-bg: rgba(63, 185, 80, 0.12);
+    --sev-patch-fg: #56d364;
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --bg-elevated: #fafafa;
+    --bg-card: #ffffff;
+    --text: #171717;
+    --text-muted: #6b6b6b;
+    --border: #e5e5e5;
+    --border-hover: #d4d4d4;
+    --accent: #0b7bb8;
+    --accent-text: #ffffff;
+    --accent-subtle: rgba(11, 123, 184, 0.08);
+    --danger: #cf222e;
+    --danger-subtle: rgba(207, 34, 46, 0.08);
+    --sev-security-bg: rgba(207, 34, 46, 0.08);
+    --sev-security-fg: #cf222e;
+    --sev-breaking-bg: rgba(154, 103, 0, 0.1);
+    --sev-breaking-fg: #9a6700;
+    --sev-patch-bg: rgba(26, 127, 55, 0.08);
+    --sev-patch-fg: #1a7f37;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 224px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 10px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .sidebar .brand { display: flex; align-items: center; gap: 9px; padding: 8px 10px 22px; text-decoration: none; }
+  .sidebar .brand img { height: 22px; }
+  .sidebar .brand span { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 1px;
+    transition: background-color 0.1s ease, color 0.1s ease;
+  }
+  .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; stroke-width: 1.75; }
+  .nav-item:hover { background: var(--bg-elevated); color: var(--text); }
+  .nav-item.active { background: var(--bg-elevated); color: var(--text); font-weight: 600; }
+
+  .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    z-index: 10;
+  }
+  .theme-toggle svg { width: 16px; height: 16px; stroke: var(--text); fill: none; stroke-width: 1.75; }
+
+  .help-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: var(--accent-text);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    z-index: 15;
+    transition: filter 0.12s ease;
+  }
+  .help-fab:hover { filter: brightness(1.1); }
+
+  main.content { flex: 1; padding: 32px 40px 60px; max-width: 880px; }
+  main.content h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -0.01em; font-weight: 600; }
+  .page-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+
+  /* Shared components */
+  button {
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    padding: 7px 12px;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+  }
+  button:hover { border-color: var(--border-hover); background: var(--bg-card); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 500; }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); filter: brightness(1.1); }
+  .btn-danger { background: transparent; border-color: var(--border); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-subtle); border-color: var(--danger); }
+  .btn-full { width: 100%; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 13px; margin: 0 0 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 100px; }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .badge.security { background: var(--sev-security-bg); color: var(--sev-security-fg); }
+  .badge.breaking { background: var(--sev-breaking-bg); color: var(--sev-breaking-fg); }
+  .badge.patch { background: var(--sev-patch-bg); color: var(--sev-patch-fg); }
+
+  .empty-state { color: var(--text-muted); font-size: 13px; padding: 8px 0; }
+  .loading { color: var(--text-muted); font-size: 13px; }
+  .form-message {
+    margin-top: 12px;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: none;
+  }
+  .form-message.success { display: block; background: var(--accent-subtle); color: var(--accent); }
+  .form-message.error { display: block; background: var(--danger-subtle); color: var(--danger); }
+
+  @media (max-width: 760px) {
+    .sidebar { width: 60px; padding: 16px 8px; }
+    .sidebar .brand span, .nav-item span, .sidebar-footer button span { display: none; }
+    .sidebar .brand { justify-content: center; padding: 8px 0 22px; }
+    .nav-item { justify-content: center; }
+    main.content { padding: 26px 18px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<button type="button" class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+  <svg id="iconMoon" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg id="iconSun" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+</button>
+
+<aside class="sidebar">
+  <a class="brand" href="/"><img src="/static/logo-mark.png" alt="DevSwell"><span>DevSwell</span></a>
+  <nav>
+    <a class="nav-item {{if eq .Active "home"}}active{{end}}" href="/dashboard">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      <span>Home</span>
+    </a>
+    <a class="nav-item {{if eq .Active "stack"}}active{{end}}" href="/dashboard/stack">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span>Stack</span>
+    </a>
+    <a class="nav-item {{if eq .Active "feed"}}active{{end}}" href="/dashboard/feed">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4z"/><path d="M8 8h4M8 11h4M16 8h4v12H8v-4"/></svg>
+      <span>General News</span>
+    </a>
+    <a class="nav-item {{if eq .Active "settings"}}active{{end}}" href="/dashboard/settings">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.14.41.43.76.83.94.4.18.86.16 1.24-.06H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </a>
+    <a class="nav-item {{if eq .Active "upgrade"}}active{{end}}" href="/dashboard/upgrade">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+      <span>Upgrade</span>
+    </a>
+    <a class="nav-item {{if eq .Active "help"}}active{{end}}" href="/dashboard/help">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+      <span>Help</span>
+    </a>
+    <a class="nav-item {{if eq .Active "support"}}active{{end}}" href="/dashboard/support">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 18 9-18 9 4-9-4-9z"/></svg>
+      <span>Support</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button type="button" onclick="logout()"><span>Log out</span></button>
+  </div>
+</aside>
+
+<main class="content">
+  {{template "content" .}}
+</main>
+
+{{if .HelpButtonLabel}}
+<a class="help-fab" href="{{.HelpButtonHref}}">{{.HelpButtonLabel}}</a>
+{{end}}
+
+<script>
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    syncThemeIcon();
+  }
+  function syncThemeIcon() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.getElementById('iconMoon').style.display = isDark ? '' : 'none';
+    document.getElementById('iconSun').style.display = isDark ? 'none' : '';
+  }
+  syncThemeIcon();
+
+  async function logout() {
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/';
+  }
+
+  function escapeHTML(s) {
+    var div = document.createElement('div');
+    div.textContent = s == null ? '' : s;
+    return div.innerHTML;
+  }
+</script>
+{{template "script" .}}
+</body>
+</html>

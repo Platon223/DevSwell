@@ -17,11 +17,10 @@ type Release struct {
 	Body        string
 }
 
-// FetchLatestRelease pulls the most recent published, non-prerelease, non-draft
-// release for owner/repo. Returns nil, nil if the repo has no releases.
-func FetchLatestRelease(ctx context.Context, owner, repo string) (*Release, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
-
+// newRequest builds a GitHub API GET request with standard headers, applying
+// GITHUB_TOKEN if set (optional — raises the rate limit, not required for
+// public repos).
+func newRequest(ctx context.Context, url string) (*http.Request, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("building request: %w", err)
@@ -30,6 +29,18 @@ func FetchLatestRelease(ctx context.Context, owner, repo string) (*Release, erro
 	req.Header.Set("User-Agent", "DevSwell-Worker")
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	return req, nil
+}
+
+// FetchLatestRelease pulls the most recent published, non-prerelease, non-draft
+// release for owner/repo. Returns nil, nil if the repo has no releases.
+func FetchLatestRelease(ctx context.Context, owner, repo string) (*Release, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
+
+	req, err := newRequest(ctx, url)
+	if err != nil {
+		return nil, err
 	}
 
 	resp, err := http.DefaultClient.Do(req)

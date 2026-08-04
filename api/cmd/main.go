@@ -44,13 +44,17 @@ func main() {
 	}
 
 	mailer := email.NewClient(os.Getenv("RESEND_API_KEY"), os.Getenv("RESEND_FROM"))
+	supportEmail := os.Getenv("SUPPORT_EMAIL")
+	if supportEmail == "" {
+		log.Println("warning: SUPPORT_EMAIL is not set, the Support page will not be able to send messages")
+	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		log.Fatal("JWT_SECRET environment variable is not set")
 	}
 
-	router := httpapi.NewRouter(users, newsItems, generalFeed, mailer, baseURL, []byte(jwtSecret))
+	router := httpapi.NewRouter(users, newsItems, generalFeed, mailer, baseURL, supportEmail, []byte(jwtSecret))
 	log.Printf("listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatalf("server error: %v", err)

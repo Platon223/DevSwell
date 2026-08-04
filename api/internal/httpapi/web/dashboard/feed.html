@@ -1,0 +1,65 @@
+{{define "title"}}General News{{end}}
+{{define "content"}}
+  <h1>General news</h1>
+  <p class="page-sub">Unfiltered, unpersonalized — top stories from Hacker News.</p>
+
+  <div id="feedList" class="loading">Loading&hellip;</div>
+{{end}}
+{{define "script"}}
+<script>
+  async function loadFeed() {
+    var el = document.getElementById('feedList');
+    var res = await fetch('/feed');
+    if (!res.ok) {
+      el.textContent = 'Could not load the general feed.';
+      return;
+    }
+    var data = await res.json();
+    var items = data.items || [];
+    if (items.length === 0) {
+      el.innerHTML = '<div class="empty-state">Nothing to show right now.</div>';
+      return;
+    }
+    el.innerHTML = items.map(function (item) {
+      return '' +
+        '<a class="feed-card" href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener">' +
+          '<div class="feed-thumb">' +
+            '<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5-9 9"/></svg>' +
+          '</div>' +
+          '<div class="feed-body">' +
+            '<h3>' + escapeHTML(item.title) + '</h3>' +
+          '</div>' +
+        '</a>';
+    }).join('');
+  }
+  loadFeed();
+</script>
+<style>
+  #feedList { display: flex; flex-direction: column; gap: 8px; }
+  .feed-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.12s ease;
+  }
+  .feed-card:hover { border-color: var(--border-hover); }
+  .feed-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .feed-thumb svg { width: 20px; height: 20px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; }
+  .feed-body h3 { font-size: 13px; font-weight: 500; margin: 0; line-height: 1.4; }
+</style>
+{{end}}

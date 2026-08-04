@@ -49,7 +49,7 @@ func requestDeletionHandler(users *mongodb.UserStore, mailer *email.Client, base
 		}
 
 		confirmLink := fmt.Sprintf("%s/me/delete/confirm?token=%s", baseURL, token)
-		if err := mailer.Send(r.Context(), user.Email, "Confirm DevSwell account deletion", confirmDeletionHTML(confirmLink)); err != nil {
+		if err := mailer.Send(r.Context(), user.Email, "Confirm DevSwell account deletion", confirmDeletionHTML(baseURL, confirmLink)); err != nil {
 			log.Printf("sending deletion confirmation email to %s: %v", user.Email, err)
 		}
 
@@ -85,12 +85,9 @@ func confirmDeletionHandler(users *mongodb.UserStore) http.HandlerFunc {
 	}
 }
 
-func confirmDeletionHTML(confirmLink string) string {
-	return fmt.Sprintf(`
-<div style="font-family: sans-serif; padding: 24px;">
-  <h2>Confirm account deletion</h2>
-  <p>We received a request to delete your DevSwell account. This action is permanent and cannot be undone.</p>
-  <p>If you did not request this, you can safely ignore this email.</p>
-  <a href="%s" style="display:inline-block;padding:12px 24px;background-color:#dc2626;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Permanently Delete My Account</a>
-</div>`, confirmLink)
+func confirmDeletionHTML(baseURL, confirmLink string) string {
+	body := `<p style="font-size:14px;color:#3a3a3a;line-height:1.6;margin:0 0 8px;">We received a request to delete your DevSwell account. This action is permanent and cannot be undone.</p>` +
+		`<p style="font-size:14px;color:#3a3a3a;line-height:1.6;margin:0 0 20px;">If you did not request this, you can safely ignore this email.</p>` +
+		email.Button(confirmLink, "Permanently Delete My Account", "#cf222e")
+	return email.BrandedHTML(baseURL+"/static/logo-mark.png", "Confirm account deletion", body)
 }
