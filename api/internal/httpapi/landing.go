@@ -16,6 +16,9 @@ var signupPageHTML []byte
 //go:embed web/login.html
 var loginPageHTML []byte
 
+//go:embed web/privacy.html
+var privacyPageHTML []byte
+
 //go:embed web/dashboard
 var dashboardTemplatesFS embed.FS
 
@@ -72,6 +75,11 @@ func signupPageHandler(w http.ResponseWriter, r *http.Request) {
 func loginPageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write(loginPageHTML)
+}
+
+func privacyPageHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(privacyPageHTML)
 }
 
 func dashboardPageHandler(section string) http.HandlerFunc {

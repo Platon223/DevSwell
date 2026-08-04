@@ -9,9 +9,10 @@ import (
 )
 
 type meResponse struct {
-	Email string   `json:"email"`
-	Plan  string   `json:"plan"`
-	Stack []string `json:"stack"`
+	Email                     string   `json:"email"`
+	Plan                      string   `json:"plan"`
+	Stack                     []string `json:"stack"`
+	EmailNotificationsEnabled bool     `json:"email_notifications_enabled"`
 }
 
 func meHandler(users *mongodb.UserStore) http.HandlerFunc {
@@ -35,6 +36,6 @@ func meHandler(users *mongodb.UserStore) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(meResponse{Email: user.Email, Plan: user.Plan, Stack: user.Stack})
+		json.NewEncoder(w).Encode(meResponse{Email: user.Email, Plan: user.Plan, Stack: user.Stack, EmailNotificationsEnabled: user.EmailNotificationsEnabled})
 	}
 }

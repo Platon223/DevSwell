@@ -131,6 +131,7 @@ func notifyUsersOfChanges(ctx context.Context, users *mongodb.UserReader, mailer
 	}
 
 	userItems := map[string][]domain.NewsItem{}
+	userTokens := map[string]string{}
 	for technology, items := range byTechnology {
 		matched, err := users.FindByTechnology(ctx, technology)
 		if err != nil {
@@ -139,11 +140,13 @@ func notifyUsersOfChanges(ctx context.Context, users *mongodb.UserReader, mailer
 		}
 		for _, u := range matched {
 			userItems[u.Email] = append(userItems[u.Email], items...)
+			userTokens[u.Email] = u.UnsubscribeToken
 		}
 	}
 
 	for recipient, items := range userItems {
-		if err := mailer.Send(ctx, recipient, "Your DevSwell stack update", stackUpdateEmailHTML(appBaseURL, items)); err != nil {
+		html := stackUpdateEmailHTML(appBaseURL, items, userTokens[recipient])
+		if err := mailer.Send(ctx, recipient, "Your DevSwell stack update", html); err != nil {
 			log.Printf("sending stack update email to %s: %v", recipient, err)
 			continue
 		}
@@ -165,7 +168,7 @@ func severityColors(severity string) (bg, fg string) {
 	}
 }
 
-func stackUpdateEmailHTML(appBaseURL string, items []domain.NewsItem) string {
+func stackUpdateEmailHTML(appBaseURL string, items []domain.NewsItem, unsubscribeToken string) string {
 	var rows strings.Builder
 	for _, item := range items {
 		bg, fg := severityColors(item.Severity)
@@ -182,9 +185,12 @@ func stackUpdateEmailHTML(appBaseURL string, items []domain.NewsItem) string {
 			htmlpkg.EscapeString(item.Project), htmlpkg.EscapeString(item.Technology)))
 	}
 
+	unsubscribeLink := fmt.Sprintf("%s/unsubscribe?token=%s", appBaseURL, unsubscribeToken)
 	body := fmt.Sprintf(`
     <p style="font-size:14px;color:#3a3a3a;line-height:1.6;margin:0 0 16px;">Here's what changed in the technologies you track:</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%%;">%s</table>`, rows.String())
+    <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%%;">%s</table>
+    <p style="font-size:12px;color:#8a8a8a;margin:24px 0 0;">Don't want these emails? <a href="%s" style="color:#8a8a8a;">Unsubscribe</a>.</p>`,
+		rows.String(), htmlpkg.EscapeString(unsubscribeLink))
 
 	return email.BrandedHTML(appBaseURL+"/static/logo-mark.png", "Your DevSwell stack update", body)
 }

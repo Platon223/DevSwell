@@ -20,9 +20,16 @@ func NewUserReader(client *mongo.Client) *UserReader {
 	}
 }
 
-// FindByTechnology returns verified users whose stack includes technology.
+// FindByTechnology returns verified, subscribed users whose stack includes
+// technology. Users predating the email_notifications_enabled field have it
+// unset, so "$ne: false" treats missing as still-subscribed rather than
+// silently opting everyone out.
 func (r *UserReader) FindByTechnology(ctx context.Context, technology string) ([]domain.User, error) {
-	cursor, err := r.collection.Find(ctx, bson.M{"stack": technology, "verified": true})
+	cursor, err := r.collection.Find(ctx, bson.M{
+		"stack":                       technology,
+		"verified":                    true,
+		"email_notifications_enabled": bson.M{"$ne": false},
+	})
 	if err != nil {
 		return nil, err
 	}

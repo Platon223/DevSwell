@@ -15,6 +15,16 @@
     </div>
   </div>
 
+  <div class="card">
+    <h2>Email notifications</h2>
+    <p class="page-sub" style="margin-bottom:16px;">Stack-update digest emails when something changes in the technologies you track.</p>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <input type="checkbox" id="notificationsToggle" onchange="updatePreferences()">
+      <span>Email me when my stack changes</span>
+    </label>
+    <div class="form-message" id="preferencesMessage"></div>
+  </div>
+
   <div class="card" style="border-color: var(--danger);">
     <h2 style="color: var(--danger);">Danger zone</h2>
     <p class="page-sub" style="margin-bottom:16px;">Deleting your account is permanent and cannot be undone. We'll email you a confirmation link before anything is actually deleted.</p>
@@ -33,6 +43,24 @@
     var me = await res.json();
     document.getElementById('settingsEmail').value = me.email;
     document.getElementById('settingsPlan').value = me.plan;
+    document.getElementById('notificationsToggle').checked = me.email_notifications_enabled;
+  }
+
+  async function updatePreferences() {
+    var checked = document.getElementById('notificationsToggle').checked;
+    var msg = document.getElementById('preferencesMessage');
+    var res = await fetch('/me/preferences', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email_notifications_enabled: checked })
+    });
+    if (res.ok) {
+      msg.textContent = 'Saved.';
+      msg.className = 'form-message success';
+    } else {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.className = 'form-message error';
+    }
   }
 
   async function requestDeletion() {

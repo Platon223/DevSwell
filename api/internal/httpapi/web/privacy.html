@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — DevSwell</title>
+<link rel="icon" type="image/png" href="/static/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    var saved = localStorage.getItem('theme');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+  })();
+</script>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0a0a0a; --bg-elevated: #111111; --bg-card: #0e0e0e;
+    --text: #f2f2f2; --text-muted: #8a8a8a; --border: #1f1f1f; --border-hover: #2e2e2e;
+    --accent: #2b9fe0; --accent-text: #ffffff; --accent-subtle: rgba(43, 159, 224, 0.12);
+    --danger: #e5534b; --danger-subtle: rgba(229, 83, 75, 0.12);
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --bg-elevated: #fafafa; --bg-card: #ffffff;
+    --text: #171717; --text-muted: #6b6b6b; --border: #e5e5e5; --border-hover: #d4d4d4;
+    --accent: #0b7bb8; --accent-text: #ffffff; --accent-subtle: rgba(11, 123, 184, 0.08);
+    --danger: #cf222e; --danger-subtle: rgba(207, 34, 46, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--text); }
+  .brand img { height: 26px; }
+  .brand span { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .back-link { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .back-link:hover { color: var(--text); }
+
+  main { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .updated { color: var(--text-muted); font-size: 13px; margin: 0 0 40px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 36px 0 10px; }
+  p, li { font-size: 14px; line-height: 1.7; color: var(--text); }
+  p.muted { color: var(--text-muted); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent); }
+  code { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+
+  footer { border-top: 1px solid var(--border); padding: 24px; color: var(--text-muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <img src="/static/logo-mark.png" alt="DevSwell">
+    <span>DevSwell</span>
+  </a>
+  <a class="back-link" href="/">&larr; Back home</a>
+</div>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated August 4, 2026</p>
+
+  <p>DevSwell is a personalized tech-stack digest product. This page explains what data we collect, why, and what control you have over it.</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Email address and password</strong> — your password is hashed with bcrypt before it's ever stored; we cannot see or recover your plaintext password.</li>
+    <li><strong>Your selected tech stack</strong> — the languages, frameworks, databases, and tools you choose to track.</li>
+    <li><strong>Account plan</strong> — free or paid tier.</li>
+    <li><strong>Support messages</strong> — if you contact us through the in-app Support form, we receive the message content and your account email.</li>
+  </ul>
+  <p class="muted">We do not collect analytics, tracking cookies, or advertising identifiers.</p>
+
+  <h2>How we use it</h2>
+  <ul>
+    <li>To authenticate you (a session token stored in an HttpOnly cookie your browser sends automatically — JavaScript cannot read it).</li>
+    <li>To filter release data down to your personalized digest.</li>
+    <li>To email you when something changes in a technology you track, and for account-related emails (verification, account deletion confirmation).</li>
+  </ul>
+
+  <h2>Third parties we use</h2>
+  <ul>
+    <li><strong>MongoDB Atlas</strong> — hosts our database. Your account data is stored there.</li>
+    <li><strong>Resend</strong> — delivers our transactional emails (verification, digest, account deletion, support).</li>
+    <li><strong>GitHub's public API</strong> — the source of release data we track. No personal data is sent to GitHub as part of this.</li>
+    <li><strong>Hacker News' public API</strong> — the source of the general news feed. No personal data is sent to it.</li>
+    <li><strong>Simple Icons CDN</strong> — loads the brand icons shown on the Stack page. Only a public icon name is requested, no personal data.</li>
+    <li><strong>Stripe</strong> — planned for our paid tier's billing; not yet in use.</li>
+  </ul>
+  <p>We do not sell your data to anyone, for any reason.</p>
+
+  <h2>Email preferences</h2>
+  <p>Every digest email includes an unsubscribe link that stops future stack-update emails without deleting your account. You can also toggle this from <a href="/dashboard/settings">Settings</a> at any time.</p>
+
+  <h2>Deleting your account</h2>
+  <p>You can permanently delete your account from <a href="/dashboard/settings">Settings</a>. We send a confirmation link by email before anything is deleted, since this action is immediate and irreversible once confirmed — all of your data is removed from our database at that point.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or your data can be sent through the in-app <a href="/dashboard/support">Support</a> form, or directly to <code>platon.tikhnenko@gmail.com</code>.</p>
+</main>
+
+<footer>&copy; 2026 DevSwell. All rights reserved.</footer>
+
+</body>
+</html>

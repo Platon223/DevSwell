@@ -85,3 +85,16 @@ func (s *UserStore) Delete(ctx context.Context, id bson.ObjectID) error {
 	_, err := s.collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err
 }
+
+func (s *UserStore) FindByUnsubscribeToken(ctx context.Context, token string) (domain.User, error) {
+	var user domain.User
+	err := s.collection.FindOne(ctx, bson.M{"unsubscribe_token": token}).Decode(&user)
+	return user, err
+}
+
+func (s *UserStore) SetEmailNotificationsEnabled(ctx context.Context, id bson.ObjectID, enabled bool) error {
+	_, err := s.collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{
+		"$set": bson.M{"email_notifications_enabled": enabled},
+	})
+	return err
+}

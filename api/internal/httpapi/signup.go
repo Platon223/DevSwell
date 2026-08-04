@@ -51,13 +51,21 @@ func signupHandler(users *mongodb.UserStore, mailer *email.Client, baseURL strin
 			return
 		}
 
+		unsubscribeToken, err := generateToken()
+		if err != nil {
+			http.Error(w, "could not create account", http.StatusInternalServerError)
+			return
+		}
+
 		user := domain.User{
-			Email:             req.Email,
-			PasswordHash:      string(hash),
-			Stack:             []string{},
-			Plan:              "free",
-			Verified:          false,
-			VerificationToken: token,
+			Email:                     req.Email,
+			PasswordHash:              string(hash),
+			Stack:                     []string{},
+			Plan:                      "free",
+			Verified:                  false,
+			VerificationToken:         token,
+			EmailNotificationsEnabled: true,
+			UnsubscribeToken:          unsubscribeToken,
 		}
 
 		if err := users.Insert(r.Context(), user); err != nil {

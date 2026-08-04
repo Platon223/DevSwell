@@ -144,7 +144,15 @@
       return;
     }
     var me = await res.json();
-    (me.stack || []).forEach(function (s) { selected.add(s); });
+    // Only keep stack entries that are still selectable items — a saved
+    // stack can contain ids removed from CATEGORIES since it was last
+    // edited (e.g. dropped tracking targets), and re-adding those silently
+    // on every save would resurrect them forever with no way to deselect.
+    var knownIds = new Set();
+    CATEGORIES.forEach(function (category) {
+      category.items.forEach(function (item) { knownIds.add(item.id); });
+    });
+    (me.stack || []).forEach(function (s) { if (knownIds.has(s)) selected.add(s); });
     renderCategories();
   }
 
